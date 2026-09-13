@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Priyanshu Calculator</title>
+<style>
+*{box-sizing:border-box}body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#0b0f19;color:#fff;font-family:Arial,sans-serif;padding:20px}
+.calculator{width:min(390px,100%);background:#151b29;border:1px solid #29334a;border-radius:28px;padding:20px;box-shadow:0 20px 50px #0008}
+.brand{text-align:center;font-size:22px;font-weight:800;margin-bottom:16px;letter-spacing:.5px}
+.screen{background:#090d15;border-radius:18px;padding:18px;min-height:105px;text-align:right;display:flex;flex-direction:column;justify-content:center;overflow:hidden}
+.expression{font-size:15px;color:#8d99ad;min-height:22px;overflow:hidden}
+.display{font-size:38px;font-weight:700;word-break:break-all}
+.keys{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:16px}
+button{height:58px;border:0;border-radius:16px;background:#222b3d;color:#fff;font-size:20px;font-weight:700;cursor:pointer}
+button:active{transform:scale(.96)}
+.op{background:#26364f}.equal{background:#4f7cff}.clear{background:#713b4a}
+.zero{grid-column:span 2}
+.footer{text-align:center;color:#71809a;font-size:12px;margin-top:14px}
+</style>
+</head>
+<body>
+<div class="calculator">
+<div class="brand">⚡ PRIYANSHU CALCULATOR</div>
+<div class="screen"><div class="expression" id="expression"></div><div class="display" id="display">0</div></div>
+<div class="keys">
+<button class="clear" data-action="clear">AC</button><button data-action="delete">⌫</button><button data-value="%">%</button><button class="op" data-value="/">÷</button>
+<button data-value="7">7</button><button data-value="8">8</button><button data-value="9">9</button><button class="op" data-value="*">×</button>
+<button data-value="4">4</button><button data-value="5">5</button><button data-value="6">6</button><button class="op" data-value="-">−</button>
+<button data-value="1">1</button><button data-value="2">2</button><button data-value="3">3</button><button class="op" data-value="+">+</button>
+<button class="zero" data-value="0">0</button><button data-value=".">.</button><button class="equal" data-action="equals">=</button>
+</div>
+<div class="footer">Built by Priyanshu Chaurasia 🚀</div>
+</div>
+<script>
+const display=document.getElementById("display"),expression=document.getElementById("expression");
+let input="";
+function render(){display.textContent=input||"0";expression.textContent=input.replace(/\*/g,"×").replace(/\//g,"÷")}
+function add(v){
+ if(display.textContent==="Error"){input=""}
+ if(v==="." && /[.]$/.test(input.split(/[+\-*/]/).pop())) return;
+ if(v==="%" && (!input || /[+\-*/.]$/.test(input))) return;
+ if(/[+\-*/]/.test(v) && /[+\-*/]$/.test(input)) input=input.slice(0,-1);
+ input+=v;render();
+}
+function calculate(){
+ if(!input || /[+\-*/.]$/.test(input)) return;
+ try{
+  if(!/^[0-9+\-*/().% ]+$/.test(input)) throw 0;
+  let result=Function('"use strict";return ('+input.replace(/%/g,"/100")+')')();
+  if(!Number.isFinite(result)) throw 0;
+  result=Math.round((result+Number.EPSILON)*1e12)/1e12;
+  input=String(result);render();
+ }catch{input="";display.textContent="Error";expression.textContent="Invalid calculation"}
+}
+document.querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{
+ const a=b.dataset.action,v=b.dataset.value;
+ if(a==="clear"){input="";render()}
+ else if(a==="delete"){input=input.slice(0,-1);render()}
+ else if(a==="equals")calculate();
+ else add(v);
+}));
+document.addEventListener("keydown",e=>{
+ if(/[0-9.+\-*/%]/.test(e.key))add(e.key);
+ else if(e.key==="Enter"||e.key==="=")calculate();
+ else if(e.key==="Backspace"){input=input.slice(0,-1);render()}
+ else if(e.key==="Escape"){input="";render()}
+});
+render();
+</script>
+</body>
+</html>
